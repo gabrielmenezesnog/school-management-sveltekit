@@ -18,6 +18,9 @@ export default defineConfig({
 			adapter: adapter()
 		})
 	],
+	ssr: {
+		noExternal: ['sveltekit-superforms']
+	},
 	test: {
 		expect: { requireAssertions: true },
 		projects: [
