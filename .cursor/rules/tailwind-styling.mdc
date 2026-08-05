@@ -1,0 +1,45 @@
+---
+description: Tailwind-only styling — ban inline style assembly; CSS only for animations
+alwaysApply: true
+---
+
+# Styling: Tailwind only (hard)
+
+**All layout and visual styling uses Tailwind utility classes.** Custom CSS and `style=` are banned for layout, spacing, color, typography, borders, shadows, sizing, and z-index.
+
+## Banned (absolute)
+
+- Building CSS strings in `<script>` (`$derived`, `.join()`, template literals) and binding them to `style=`
+- `style=` / `style:` for height, width, padding, margin, gap, z-index, color, font, border, shadow, display, position (except true one-off animation progress driven by runtime values)
+- Component-specific CSS classes in `app.css` (or elsewhere) that Tailwind utilities already cover
+- TS constants whose only purpose is feeding those layout styles (`APP_HEADER_HEIGHT_PX`, etc.)
+
+```svelte
+<!-- BAD -->
+const headerStyle = $derived(
+	[
+		`height: ${APP_HEADER_HEIGHT_PX}px`,
+		`padding: 0 ${APP_HEADER_HORIZONTAL_PADDING_PX}px`,
+		`gap: ${APP_HEADER_SECTION_GAP_PX}px`,
+		`z-index: ${APP_HEADER_Z_INDEX}`
+	].join('; ')
+);
+<header style={headerStyle}>…</header>
+```
+
+```svelte
+<!-- GOOD -->
+<header class="sticky top-0 z-header flex h-16 items-center gap-8 px-6 shadow-(--header-shadow)">…</header>
+```
+
+Prefer theme utilities (`rounded`, `z-header`) and Tailwind v4 canonical token classes (`outline-(--ring)`, `text-(--foreground)`). Ban `*[var(--token)]` when `*(--token)` or a named utility works.
+
+Use `cn()` with **one concern per argument** (position → layout → type → color → motion → interactive → state). Do not dump every utility into a single string.
+
+## Allowed CSS only for
+
+- `@keyframes` / animation definitions and `prefers-reduced-motion` companions
+- Global design tokens in `@theme` / `:root` (colors, fonts, radii, shadows) consumed by Tailwind — not component layout rules
+- Third-party / shadcn primitive styles that the stack already ships
+
+If a visual need feels “hard in Tailwind,” prefer theme tokens + utilities (`h-16`, `px-6`, `gap-8`, `shadow-(--header-shadow)`) over new CSS or `style=`. Full text: [`docs/code-rules.md`](../../docs/code-rules.md).
