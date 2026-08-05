@@ -81,7 +81,7 @@ All colors are defined as CSS variables using OKLCH for perceptual uniformity.
 	--color-success-600: oklch(45% 0.16 155);
 	--color-success-500: oklch(55% 0.18 155);
 	--color-success-100: oklch(93% 0.05 155);
-	--color-warning-600: oklch(60% 0.18 70);
+	--color-warning-600: oklch(48% 0.18 70);
 	--color-warning-500: oklch(70% 0.2 70);
 	--color-warning-100: oklch(95% 0.06 70);
 	--color-danger-600: oklch(42% 0.22 25);
@@ -783,7 +783,7 @@ In `src/app.css` (SvelteKit) or `src/index.css` (Vite), declare the tokens insid
 	--secondary: oklch(93% 0.02 255);
 	--secondary-foreground: oklch(30% 0.08 255);
 	--muted: oklch(94% 0.01 255);
-	--muted-foreground: oklch(55% 0.01 255);
+	--muted-foreground: oklch(52% 0.01 255);
 	--accent: oklch(55% 0.24 270);
 	--accent-foreground: oklch(100% 0 0);
 	--destructive: oklch(52% 0.24 25);

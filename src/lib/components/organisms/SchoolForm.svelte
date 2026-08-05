@@ -181,7 +181,7 @@
 							disabled={isFormBusy}
 							onValueChange={handleTypeChange}
 						>
-							<Select.Trigger id="school-type" aria-required="true" class={selectTriggerClassName}>
+							<Select.Trigger id="school-type" class={selectTriggerClassName}>
 								{selectedTypeLabel}
 							</Select.Trigger>
 							<Select.Content>

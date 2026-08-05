@@ -235,7 +235,7 @@
 							disabled={isFormBusy}
 							onValueChange={handleLevelChange}
 						>
-							<Select.Trigger id="class-level" aria-required="true" class={selectTriggerClassName}>
+							<Select.Trigger id="class-level" class={selectTriggerClassName}>
 								{selectedLevelLabel}
 							</Select.Trigger>
 							<Select.Content>
@@ -255,7 +255,7 @@
 							disabled={isFormBusy}
 							onValueChange={handleShiftChange}
 						>
-							<Select.Trigger id="class-shift" aria-required="true" class={selectTriggerClassName}>
+							<Select.Trigger id="class-shift" class={selectTriggerClassName}>
 								{selectedShiftLabel}
 							</Select.Trigger>
 							<Select.Content>

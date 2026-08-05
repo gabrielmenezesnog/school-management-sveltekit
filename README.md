@@ -4,6 +4,31 @@ Web application for managing public schools and their classes for a city educati
 
 Product name: **gerencie.me**.
 
+## Challenge requirements
+
+Mapping of the original technical challenge brief to where each item is implemented.
+
+| Requirement                                   | Where                                                                                    |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| SvelteKit (stable) + TypeScript               | `package.json`, `tsconfig.json` (strict mode)                                            |
+| HTML5 and CSS3                                | Semantic markup + Tailwind CSS v4 (`src/app.css`)                                        |
+| json-server mock REST API                     | `db.json`, `pnpm run json-server`                                                        |
+| Playwright E2E tests                          | `e2e/schools.e2e.ts`, `e2e/classes.e2e.ts`                                               |
+| Git version control                           | Commit history, PR-based `dev` → `main` workflow                                         |
+| ESLint + Prettier                             | `eslint.config.js`, `prettier.config.js`, `pnpm run lint`                                |
+| List schools                                  | `/schools` — `SchoolsTable`                                                              |
+| Create schools                                | `/schools` "New school" — `SchoolForm`                                                   |
+| Edit / delete schools                         | `SchoolsTable` row actions, `ConfirmDialog`                                              |
+| List classes by school                        | `/schools/[id]` — `ClassesTable`                                                         |
+| Create / edit / delete classes                | `ClassForm` on the school detail page                                                    |
+| Search and filter schools                     | `SchoolsFilterCard` + `filterSchools`, covered by a dedicated E2E test                   |
+| `GET/POST/PUT/DELETE /schools` and `/classes` | `schoolsService`, `classesService` via the shared `apiClient`                            |
+| Unit tests (Vitest)                           | 50 tests colocated under `src/`                                                          |
+| Accessibility (WCAG 2.2 AA)                   | `docs/design-system.md`, `docs/code-rules.md` Accessibility, automated axe checks in E2E |
+| Feature-based architecture                    | `src/lib/features/schools`, `src/lib/features/classes`                                   |
+| Componentization and reuse                    | `src/lib/components/{atoms,molecules,organisms}`                                         |
+| CI/CD                                         | `.github/workflows/ci.yml`                                                               |
+
 ## Status
 
 Schools and classes management are implemented end to end for the challenge scope.
