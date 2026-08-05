@@ -1,3 +1,4 @@
+import { PAGINATION_DEFAULT_PER_PAGE } from '$lib/constants/pagination';
 import type {
 	SchoolsFilterOption,
 	SchoolsStatusFilterValue,
@@ -22,6 +23,12 @@ export const SCHOOLS_TABLE_ACTION_ICON_SIZE_PX = 14;
 export const SCHOOLS_TABLE_ADD_ICON_SIZE_PX = 16;
 
 export const SCHOOLS_TABLE_COLUMN_COUNT = 7;
+
+export const SCHOOLS_TABLE_PAGE_SIZE = PAGINATION_DEFAULT_PER_PAGE;
+
+export const SCHOOLS_SINGULAR_COUNT = 1;
+
+export const SCHOOLS_TABLE_SKELETON_ROW_COUNT = 5;
 
 export const SCHOOL_TYPE_LABELS: Record<SchoolType, string> = {
 	municipal: 'Municipal',
