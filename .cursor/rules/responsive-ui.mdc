@@ -1,0 +1,33 @@
+---
+description: Responsive UI is mandatory — mobile-first Tailwind at design-system breakpoints
+alwaysApply: true
+---
+
+# Responsive UI (hard)
+
+Every UI surface must work from mobile through desktop. Desktop-only layouts are banned.
+
+## Breakpoints ([docs/design-system.md](../../docs/design-system.md) §18)
+
+| Token | Min-width | Use |
+| ----- | --------- | --- |
+| `sm`  | 640px     | Mobile → tablet adjustments |
+| `md`  | 768px     | Table layout |
+| `lg`  | 1000px    | Two-column / sidebar |
+| `xl`  | 1280px    | Max content width |
+
+## Required
+
+- Mobile-first: base = small viewport; enhance with `sm:` / `md:` / `lg:` / `xl:`
+- Shell padding: `px-4 sm:px-6` (16px → 24px); content `max-w-7xl`
+- No horizontal overflow — use `min-w-0`, `truncate`, `shrink-0` in flex rows
+- Hide/reflow secondary chrome on small screens (`max-sm:hidden`); keep primary nav/actions usable
+- Verify ~375px and desktop before done (Playwright / browser when UI is involved)
+
+## Banned
+
+- Fixed widths that overflow small screens
+- Hover-only UI with no keyboard/touch path
+- Skipping responsive work because “MVP is desktop”
+
+Full text: [`docs/code-rules.md`](../../docs/code-rules.md).

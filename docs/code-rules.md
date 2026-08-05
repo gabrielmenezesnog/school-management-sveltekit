@@ -44,12 +44,12 @@ These rules apply to every change in this project. Entry point / project overvie
 - **Typed props**, declared as a named interface directly above the destructure:
   ```svelte
   <script lang="ts">
-    interface SchoolCardProps {
-      school: School;
-      onSelect: (id: string) => void;
-    }
+  	interface SchoolCardProps {
+  		school: School;
+  		onSelect: (id: string) => void;
+  	}
 
-    let { school, onSelect }: SchoolCardProps = $props();
+  	let { school, onSelect }: SchoolCardProps = $props();
   </script>
   ```
 - **`load` functions:** prefer universal `+page.ts`/`+layout.ts` `load` over `+page.server.ts` unless the task genuinely needs server-only capability (secrets, filesystem, cookies) — there's no auth/session here, so a server-only load is rarely justified.
@@ -57,16 +57,21 @@ These rules apply to every change in this project. Entry point / project overvie
 - **Shared reactive state** lives in `src/lib/stores/*.svelte.ts` using runes (`$state` at module scope inside a `.svelte.ts` file, or a factory function returning rune-backed state). Don't reach for the legacy `writable`/`readable` from `svelte/store` for new state unless integrating with an API that specifically requires the store contract.
 - **No inline function bodies in event attributes.** Extract any handler with real logic into a named function in the component's `<script>` block:
   ```svelte
-  <!-- Bad -->
-  <button onclick={() => { const next = computeNext(item); saveItem(next); }}>Save</button>
-
   <!-- Good -->
   <script lang="ts">
-    function handleSave(item: SchoolClass): void {
-      const next = computeNext(item);
-      saveItem(next);
-    }
+  	function handleSave(item: SchoolClass): void {
+  		const next = computeNext(item);
+  		saveItem(next);
+  	}
   </script>
+
+  <!-- Bad -->
+  <button
+  	onclick={() => {
+  		const next = computeNext(item);
+  		saveItem(next);
+  	}}>Save</button
+  >
   <button onclick={() => handleSave(item)}>Save</button>
   ```
 
@@ -83,7 +88,7 @@ These rules apply to every change in this project. Entry point / project overvie
 
   // Good
   if (condition) {
-    doSomething();
+  	doSomething();
   }
   ```
 - Boolean variables and functions must use semantic prefixes: `is`, `has`, `should`, `can`, `will`, `did`.
@@ -98,8 +103,8 @@ These rules apply to every change in this project. Entry point / project overvie
   const FIRST_CHARACTER_REGEX = /^./;
 
   value
-    .replace(SNAKE_CASE_UNDERSCORE_REGEX, ' ')
-    .replace(FIRST_CHARACTER_REGEX, (char) => char.toUpperCase());
+  	.replace(SNAKE_CASE_UNDERSCORE_REGEX, ' ')
+  	.replace(FIRST_CHARACTER_REGEX, (char) => char.toUpperCase());
   ```
 - Simplify null/undefined/empty checks — no explicit comparisons.
   ```ts
@@ -111,10 +116,97 @@ These rules apply to every change in this project. Entry point / project overvie
   ```
 - **No single-use display-string constants.** Static copy rendered in exactly one place (a heading, a button label, an empty-state message) stays inline in the markup — don't hoist it into a top-level `const TITLE = '...'`. Only extract a string when it's genuinely reused elsewhere or is a non-display identifier (a key, a route, a namespace). The "no magic numbers" rule does not extend to human-readable copy.
 
+## Styling (Tailwind only — hard)
+
+**All layout and visual styling is Tailwind.** Custom CSS and inline `style=` are not an alternative for spacing, sizing, color, typography, borders, shadows, display, position, or z-index.
+
+### Banned (absolute)
+
+- Assembling CSS in `<script>` (`$derived`, `.join()`, template literals) and binding it to `style=` / `style:`
+- Using `style=` for layout or visual properties that Tailwind utilities express
+- Adding component-specific layout/visual classes in `src/app.css` (or other global CSS) when Tailwind covers the same rules
+- Creating TypeScript constants whose only job is to feed those layout styles (e.g. `APP_HEADER_HEIGHT_PX` used only to build a style string)
+
+```svelte
+<!-- Bad -->
+<script lang="ts">
+	const headerStyle = $derived(
+		[
+			`height: ${APP_HEADER_HEIGHT_PX}px`,
+			`padding: 0 ${APP_HEADER_HORIZONTAL_PADDING_PX}px`,
+			`gap: ${APP_HEADER_SECTION_GAP_PX}px`,
+			`z-index: ${APP_HEADER_Z_INDEX}`
+		].join('; ')
+	);
+</script>
+
+<header style={headerStyle}>…</header>
+```
+
+```svelte
+<!-- Good -->
+<header
+	class="bg-navy-800 z-header sticky top-0 flex h-16 items-center gap-8 px-6 shadow-(--header-shadow)"
+>
+	…
+</header>
+```
+
+Prefer Tailwind v4 canonical token classes: `outline-(--ring)`, `shadow-(--header-shadow)`, `text-(--foreground)`, `ease-(--ease-standard)`. Prefer named theme utilities when they exist (`rounded`, `rounded-sm`, `z-header`) over `*(--token)` or `*[var(--token)]`. Never write `*[var(--token)]` when `*(--token)` or a theme utility works.
+
+### `cn()` class organization
+
+Use `cn()` for multi-concern class lists (not only conditionals). Pass **one concern per argument**, in this order when present: position/stacking → layout/spacing → typography → color/surface → motion → interactive (`hover`/`focus`) → conditional state. Keep single-utility elements as a plain `class="…"`.
+
+```svelte
+<!-- Bad — one opaque string -->
+<a class="cursor-pointer border-b-2 … font-heading … hover:text-white focus-visible:…">
+
+<!-- Good — grouped by concern -->
+<a
+	class={cn(
+		'cursor-pointer border-b-2 border-transparent bg-transparent py-1 no-underline',
+		'font-heading text-[0.8125rem] font-medium text-white/80',
+		'transition-colors duration-200 motion-reduce:transition-none',
+		'hover:text-white',
+		'focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--ring)',
+		isSchoolsNavActive && 'border-indigo-400 text-white'
+	)}
+>
+```
+
+### Allowed custom CSS — animations and tokens only
+
+- `@keyframes`, animation utility definitions, and matching `prefers-reduced-motion` rules
+- Global design tokens in `@theme` / `:root` (palette, fonts, radii, shared shadows) that Tailwind classes reference — not per-component layout rules
+- Styles shipped by the locked stack (e.g. shadcn-svelte primitives) when following [`base-project.md`](./base-project.md)
+
+If something feels awkward in Tailwind, extend the theme / use canonical token utilities (`shadow-(--header-shadow)`, `h-16`, `px-6`) — do not fall back to hardcoded CSS or script-built `style` strings. Visual source of truth: [`design-system.md`](./design-system.md).
+
+## Responsive UI (hard)
+
+**Every UI you ship must be usable on mobile and desktop.** Desktop-only layouts are not acceptable. Breakpoints and page padding live in [`design-system.md`](./design-system.md) §18 (`sm` 640px, `md` 768px, `lg` 1000px, `xl` 1280px).
+
+### Required
+
+- **Mobile-first:** base classes are the small-viewport default; scale up with `sm:` / `md:` / `lg:` / `xl:`
+- Match design-system shell padding (`px-4` → `sm:px-6` for 16px → 24px) and content `max-w-7xl`
+- Prevent horizontal overflow (`min-w-0`, `truncate`, `shrink-0` where flex children fight for space)
+- Hide or reflow secondary chrome on small screens (e.g. header tagline `max-sm:hidden`) — never clip primary actions or nav labels
+- Tables, forms, dialogs, and multi-column grids must reflow or scroll intentionally below `md` / `lg` as defined in the design system
+- Verify at least a narrow (~375px) and a desktop width before calling UI work done (Playwright / browser MCP when UI is involved)
+
+### Banned
+
+- Fixed widths that force overflow on small screens (`w-[1200px]`, non-wrapping toolbars with no mobile alternative)
+- Relying on hover-only affordances with no keyboard/touch equivalent
+- Assuming “the challenge is desktop” — responsive is part of the quality bar equal to Tailwind and a11y
+
 ## Constants and shared values
 
 - Shared constants (routes, storage keys, enums, query params) live in `src/lib/constants/`, never inside a component file.
 - A constant used by more than one feature must not live in the scope of a single component or feature folder.
+- Do not add layout/size constants in TypeScript for styling — express those values with Tailwind (and design tokens) instead. Numeric props required by a library API (e.g. Lucide `size`) may stay as named constants.
 
 ## Components
 

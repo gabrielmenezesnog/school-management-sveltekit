@@ -26,3 +26,6 @@ test-results
 
 # Graphify
 graphify-out
+
+# Local symlink to the Figma Make reference UI (see CLAUDE.md)
+/reference/
