@@ -3,6 +3,8 @@
 	import { Badge } from '$lib/components/atoms/Badge/index.js';
 	import { Button } from '$lib/components/atoms/Button/index.js';
 	import * as Table from '$lib/components/atoms/Table/index.js';
+	import type { ClassCountBySchoolId } from '$lib/features/classes/types';
+	import { EMPTY_CLASS_COUNT } from '$lib/features/classes/constants';
 	import {
 		SCHOOL_STATUS_LABELS,
 		SCHOOL_TYPE_BADGE_VARIANT,
@@ -12,18 +14,22 @@
 		SCHOOLS_TABLE_EMPTY_ICON_SIZE_PX,
 		SCHOOLS_TABLE_MAP_PIN_ICON_SIZE_PX
 	} from '$lib/features/schools/constants';
+	import type {
+		SchoolsTableAddHandler,
+		SchoolsTableSchoolHandler
+	} from '$lib/features/schools/types';
 	import type { School } from '$lib/types/School';
 	import { cn } from '$lib/utils/cn';
 
 	export interface SchoolsTableProps {
 		schools: School[];
-		classCountBySchoolId: Record<string, number>;
+		classCountBySchoolId: ClassCountBySchoolId;
 		hasActiveFilters: boolean;
 		hasSearchQuery: boolean;
-		onViewSchool: (school: School) => void;
-		onEditSchool: (school: School) => void;
-		onDeleteSchool: (school: School) => void;
-		onAddSchool: () => void;
+		onViewSchool?: SchoolsTableSchoolHandler;
+		onEditSchool?: SchoolsTableSchoolHandler;
+		onDeleteSchool?: SchoolsTableSchoolHandler;
+		onAddSchool?: SchoolsTableAddHandler;
 	}
 
 	let {
@@ -51,19 +57,33 @@
 			: 'Start by adding the first school.'
 	);
 
+	const shouldShowEmptyAddAction = $derived<boolean>(Boolean(onAddSchool) && !isFilteredEmpty);
+
 	function getClassCount(schoolId: string): number {
-		return classCountBySchoolId[schoolId] ?? 0;
+		return classCountBySchoolId[schoolId] ?? EMPTY_CLASS_COUNT;
 	}
 
 	function handleViewActionClick(school: School): void {
+		if (!onViewSchool) {
+			return;
+		}
+
 		onViewSchool(school);
 	}
 
 	function handleEditActionClick(school: School): void {
+		if (!onEditSchool) {
+			return;
+		}
+
 		onEditSchool(school);
 	}
 
 	function handleDeleteActionClick(school: School): void {
+		if (!onDeleteSchool) {
+			return;
+		}
+
 		onDeleteSchool(school);
 	}
 </script>
@@ -234,7 +254,7 @@
 						<p class={cn('font-body text-muted-foreground mb-5 text-sm')}>
 							{emptyDescription}
 						</p>
-						{#if !isFilteredEmpty}
+						{#if shouldShowEmptyAddAction && onAddSchool}
 							<Button type="button" size="sm" onclick={onAddSchool}>
 								<Plus size={SCHOOLS_TABLE_ACTION_ICON_SIZE_PX} aria-hidden="true" />
 								New school
