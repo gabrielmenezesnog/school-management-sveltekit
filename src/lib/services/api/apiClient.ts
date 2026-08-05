@@ -1,4 +1,5 @@
 import { PUBLIC_API_BASE_URL } from '$env/static/public';
+import { API_UNAVAILABLE_MESSAGE } from '$lib/constants/apiAvailability';
 import {
 	ACCEPT_HEADER_NAME,
 	APPLICATION_JSON_MIME_TYPE,
@@ -7,7 +8,8 @@ import {
 import {
 	HTTP_INTERNAL_SERVER_ERROR,
 	HTTP_NO_CONTENT,
-	HTTP_RESET_CONTENT
+	HTTP_RESET_CONTENT,
+	HTTP_SERVICE_UNAVAILABLE
 } from '$lib/constants/httpStatus';
 import { ApiRequestError } from '$lib/services/api/ApiRequestError';
 import { getApiErrorMessage } from '$lib/utils/getApiErrorMessage';
@@ -28,27 +30,51 @@ export function buildApiRequestUrl(path: string): string {
 	return `${getApiBaseUrl()}${path}`;
 }
 
+function toApiRequestError(fetchError: Error): ApiRequestError {
+	if (fetchError instanceof ApiRequestError) {
+		return fetchError;
+	}
+
+	if (fetchError instanceof TypeError) {
+		return new ApiRequestError(API_UNAVAILABLE_MESSAGE, HTTP_SERVICE_UNAVAILABLE);
+	}
+
+	return new ApiRequestError(fetchError.message, HTTP_SERVICE_UNAVAILABLE);
+}
+
 async function request(
 	path: string,
 	init: RequestInit | undefined,
 	fetcher: ApiFetcher
 ): Promise<Response> {
-	const response = await fetcher(buildApiRequestUrl(path), {
-		...init,
-		headers: {
-			[ACCEPT_HEADER_NAME]: APPLICATION_JSON_MIME_TYPE,
-			[CONTENT_TYPE_HEADER_NAME]: APPLICATION_JSON_MIME_TYPE,
-			...init?.headers
+	try {
+		const response = await fetcher(buildApiRequestUrl(path), {
+			...init,
+			headers: {
+				[ACCEPT_HEADER_NAME]: APPLICATION_JSON_MIME_TYPE,
+				[CONTENT_TYPE_HEADER_NAME]: APPLICATION_JSON_MIME_TYPE,
+				...init?.headers
+			}
+		});
+
+		if (!response.ok) {
+			const message = await getApiErrorMessage(response);
+
+			throw new ApiRequestError(message, response.status);
 		}
-	});
 
-	if (!response.ok) {
-		const message = await getApiErrorMessage(response);
+		return response;
+	} catch (fetchError) {
+		if (fetchError instanceof ApiRequestError) {
+			throw fetchError;
+		}
 
-		throw new ApiRequestError(message, response.status);
+		if (fetchError instanceof Error) {
+			throw toApiRequestError(fetchError);
+		}
+
+		throw new ApiRequestError(API_UNAVAILABLE_MESSAGE, HTTP_SERVICE_UNAVAILABLE);
 	}
-
-	return response;
 }
 
 function isNoContentStatus(status: number): boolean {

@@ -1,71 +1,49 @@
 <script lang="ts">
-	import { Plus } from '@lucide/svelte';
+	import { goto, invalidateAll } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { navigating } from '$app/state';
-	import { Button } from '$lib/components/atoms/Button/index.js';
-	import SchoolsFilterCard from '$lib/components/molecules/SchoolsFilterCard.svelte';
-	import SchoolsTableSkeleton from '$lib/components/molecules/SchoolsTableSkeleton.svelte';
-	import TablePagination from '$lib/components/molecules/TablePagination.svelte';
-	import SchoolsTable from '$lib/components/organisms/SchoolsTable.svelte';
+	import ConfirmDialog from '$lib/components/molecules/ConfirmDialog.svelte';
+	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
+	import SchoolsPageHeader from '$lib/components/molecules/SchoolsPageHeader.svelte';
+	import SchoolForm from '$lib/components/organisms/SchoolForm.svelte';
+	import SchoolsListSection from '$lib/components/organisms/SchoolsListSection.svelte';
+	import { EMPTY_CLASS_COUNT } from '$lib/features/classes/constants';
+	import { SCHOOLS_SINGULAR_COUNT } from '$lib/features/schools/constants';
 	import {
-		SCHOOLS_FILTER_ALL_VALUE,
-		SCHOOLS_SINGULAR_COUNT,
-		SCHOOLS_TABLE_ADD_ICON_SIZE_PX,
-		SCHOOLS_TABLE_PAGE_SIZE
-	} from '$lib/features/schools/constants';
-	import { filterSchools } from '$lib/features/schools/filterSchools';
-	import type {
-		SchoolsStatusFilterValue,
-		SchoolsTypeFilterValue
-	} from '$lib/features/schools/types';
+		buildSchoolCreateInput,
+		buildSchoolFormValues,
+		buildSchoolUpdateInput,
+		EMPTY_SCHOOL_FORM_VALUES
+	} from '$lib/features/schools/buildSchoolFormValues';
+	import { buildSchoolDeleteDescription } from '$lib/features/schools/buildSchoolDeleteDescription';
+	import { deleteSchoolCascade } from '$lib/features/schools/deleteSchoolCascade';
+	import type { SchoolFormValues } from '$lib/features/schools/schoolFormTypes';
 	import { APP_BRAND_NAME, SCHOOLS_NAV_LABEL } from '$lib/constants/appHeader';
-	import { PAGINATION_FIRST_PAGE } from '$lib/constants/pagination';
 	import { SCHOOLS_ROUTE } from '$lib/constants/routes';
+	import { schoolsService } from '$lib/services/api/schoolsService';
 	import type { School } from '$lib/types/School';
-	import { cn } from '$lib/utils/cn';
-	import { paginateItems } from '$lib/utils/paginateItems';
+	import { getClientErrorMessage } from '$lib/utils/getClientErrorMessage';
+	import { showErrorToast, showSuccessToast } from '$lib/utils/toast';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 
-	let searchQuery = $state<string>('');
-	let typeFilter = $state<SchoolsTypeFilterValue>(SCHOOLS_FILTER_ALL_VALUE);
-	let statusFilter = $state<SchoolsStatusFilterValue>(SCHOOLS_FILTER_ALL_VALUE);
-	let currentPage = $state<number>(PAGINATION_FIRST_PAGE);
+	let isRetryingApi = $state<boolean>(false);
+	let isSchoolFormOpen = $state<boolean>(false);
+	let schoolBeingEdited = $state<School | null>(null);
+	let schoolFormSessionId = $state<number>(0);
+	let isSavingSchool = $state<boolean>(false);
+	let isDeleteDialogOpen = $state<boolean>(false);
+	let schoolPendingDelete = $state<School | null>(null);
+	let isDeletingSchool = $state<boolean>(false);
 
 	const isLoadingSchools = $derived<boolean>(
 		Boolean(navigating?.to?.url.pathname.startsWith(SCHOOLS_ROUTE))
 	);
 
-	const filteredSchools = $derived<School[]>(
-		filterSchools({
-			schools: data.schools,
-			searchQuery,
-			typeFilter,
-			statusFilter
-		})
-	);
+	const isApiUnavailable = $derived<boolean>(Boolean(data.apiUnavailableMessage));
 
-	const resultCount = $derived<number>(filteredSchools.length);
-
-	const pageCount = $derived<number>(
-		Math.max(PAGINATION_FIRST_PAGE, Math.ceil(resultCount / SCHOOLS_TABLE_PAGE_SIZE))
-	);
-
-	const activePage = $derived<number>(Math.min(currentPage, pageCount));
-
-	const pagedSchools = $derived<School[]>(
-		paginateItems({
-			items: filteredSchools,
-			page: activePage,
-			perPage: SCHOOLS_TABLE_PAGE_SIZE
-		})
-	);
-
-	const hasActiveFilters = $derived<boolean>(
-		typeFilter !== SCHOOLS_FILTER_ALL_VALUE || statusFilter !== SCHOOLS_FILTER_ALL_VALUE
-	);
-
-	const hasSearchQuery = $derived<boolean>(searchQuery.trim().length > 0);
+	const isEditingSchool = $derived<boolean>(Boolean(schoolBeingEdited));
 
 	const registeredSchoolsLabel = $derived<string>(
 		data.schools.length === SCHOOLS_SINGULAR_COUNT
@@ -73,33 +51,140 @@
 			: `${data.schools.length} schools registered`
 	);
 
-	function resetCurrentPage(): void {
-		currentPage = PAGINATION_FIRST_PAGE;
+	const schoolsStatusLabel = $derived.by((): string => {
+		if (isLoadingSchools) {
+			return 'Loading schools…';
+		}
+
+		if (isApiUnavailable) {
+			return 'API unavailable';
+		}
+
+		return registeredSchoolsLabel;
+	});
+
+	const schoolFormInitialValues = $derived<SchoolFormValues>(
+		schoolBeingEdited ? buildSchoolFormValues(schoolBeingEdited) : { ...EMPTY_SCHOOL_FORM_VALUES }
+	);
+
+	const deleteDialogTitle = $derived<string>(
+		schoolPendingDelete ? `Delete "${schoolPendingDelete.name}"?` : 'Delete school?'
+	);
+
+	const deleteDialogDescription = $derived<string>(
+		schoolPendingDelete
+			? buildSchoolDeleteDescription({
+					schoolName: schoolPendingDelete.name,
+					classCount: data.classCountBySchoolId[schoolPendingDelete.id] ?? EMPTY_CLASS_COUNT
+				})
+			: ''
+	);
+
+	async function handleRetryApiLoad(): Promise<void> {
+		isRetryingApi = true;
+
+		try {
+			await invalidateAll();
+		} finally {
+			isRetryingApi = false;
+		}
 	}
 
-	function handlePageChange(page: number): void {
-		currentPage = page;
+	function handleAddSchool(): void {
+		schoolBeingEdited = null;
+		schoolFormSessionId += 1;
+		isSchoolFormOpen = true;
 	}
 
-	function handleSearchQueryChange(query: string): void {
-		searchQuery = query;
-		resetCurrentPage();
+	function handleEditSchool(school: School): void {
+		schoolBeingEdited = school;
+		schoolFormSessionId += 1;
+		isSchoolFormOpen = true;
 	}
 
-	function handleTypeFilterChange(type: SchoolsTypeFilterValue): void {
-		typeFilter = type;
-		resetCurrentPage();
+	function handleCloseSchoolForm(): void {
+		if (isSavingSchool) {
+			return;
+		}
+
+		isSchoolFormOpen = false;
+		schoolBeingEdited = null;
 	}
 
-	function handleStatusFilterChange(status: SchoolsStatusFilterValue): void {
-		statusFilter = status;
-		resetCurrentPage();
+	function handleViewSchool(school: School): void {
+		void goto(resolve('/schools/[id]', { id: school.id }));
 	}
 
-	function handleClearFilters(): void {
-		typeFilter = SCHOOLS_FILTER_ALL_VALUE;
-		statusFilter = SCHOOLS_FILTER_ALL_VALUE;
-		resetCurrentPage();
+	function handleDeleteSchool(school: School): void {
+		schoolPendingDelete = school;
+		isDeleteDialogOpen = true;
+	}
+
+	function handleCancelDeleteSchool(): void {
+		if (isDeletingSchool) {
+			return;
+		}
+
+		isDeleteDialogOpen = false;
+		schoolPendingDelete = null;
+	}
+
+	async function handleSubmitSchool(values: SchoolFormValues): Promise<void> {
+		isSavingSchool = true;
+
+		try {
+			if (schoolBeingEdited) {
+				await schoolsService.update(
+					schoolBeingEdited.id,
+					buildSchoolUpdateInput(schoolBeingEdited, values)
+				);
+				showSuccessToast(`${values.name} updated successfully.`);
+			} else {
+				await schoolsService.create(buildSchoolCreateInput(values));
+				showSuccessToast(`${values.name} created successfully.`);
+			}
+
+			isSchoolFormOpen = false;
+			schoolBeingEdited = null;
+			await invalidateAll();
+		} catch (submitError) {
+			if (submitError instanceof Error) {
+				showErrorToast(getClientErrorMessage(submitError, 'Failed to save school.'));
+				return;
+			}
+
+			showErrorToast('Failed to save school.');
+		} finally {
+			isSavingSchool = false;
+		}
+	}
+
+	async function handleConfirmDeleteSchool(): Promise<void> {
+		if (!schoolPendingDelete) {
+			return;
+		}
+
+		const schoolName = schoolPendingDelete.name;
+		const schoolId = schoolPendingDelete.id;
+
+		isDeletingSchool = true;
+
+		try {
+			await deleteSchoolCascade(schoolId);
+			showSuccessToast(`${schoolName} deleted successfully.`);
+			isDeleteDialogOpen = false;
+			schoolPendingDelete = null;
+			await invalidateAll();
+		} catch (deleteError) {
+			if (deleteError instanceof Error) {
+				showErrorToast(getClientErrorMessage(deleteError, `Failed to delete ${schoolName}.`));
+				return;
+			}
+
+			showErrorToast(`Failed to delete ${schoolName}.`);
+		} finally {
+			isDeletingSchool = false;
+		}
 	}
 </script>
 
@@ -107,57 +192,51 @@
 	<title>{SCHOOLS_NAV_LABEL} — {APP_BRAND_NAME}</title>
 </svelte:head>
 
-<div class={cn('flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4')}>
-	<div class="min-w-0">
-		<h1
-			class={cn(
-				'font-heading text-2xl font-bold tracking-[-0.02em] sm:text-[2rem]',
-				'text-(--foreground)'
-			)}
-		>
-			{SCHOOLS_NAV_LABEL}
-		</h1>
-		<p class={cn('font-body mt-1.5 text-sm', 'text-(--muted-foreground)')}>
-			{#if isLoadingSchools}
-				Loading schools…
-			{:else}
-				{registeredSchoolsLabel}
-			{/if}
-		</p>
-	</div>
-
-	<Button type="button" class="w-full shrink-0 sm:w-auto" disabled>
-		<Plus size={SCHOOLS_TABLE_ADD_ICON_SIZE_PX} aria-hidden="true" />
-		New school
-	</Button>
-</div>
+<SchoolsPageHeader
+	statusLabel={schoolsStatusLabel}
+	isAddDisabled={isApiUnavailable}
+	onAddSchool={handleAddSchool}
+/>
 
 <div class="mt-6 w-full sm:mt-8">
-	<SchoolsFilterCard
-		{searchQuery}
-		{typeFilter}
-		{statusFilter}
-		{resultCount}
-		onSearchQueryChange={handleSearchQueryChange}
-		onTypeFilterChange={handleTypeFilterChange}
-		onStatusFilterChange={handleStatusFilterChange}
-		onClearFilters={handleClearFilters}
-	/>
-
-	{#if isLoadingSchools}
-		<SchoolsTableSkeleton />
-	{:else}
-		<SchoolsTable
-			schools={pagedSchools}
-			classCountBySchoolId={data.classCountBySchoolId}
-			{hasActiveFilters}
-			{hasSearchQuery}
+	{#if isApiUnavailable && data.apiUnavailableMessage}
+		<EmptyState
+			heading="API unavailable"
+			description={data.apiUnavailableMessage}
+			actionLabel="Try again"
+			isActionPending={isRetryingApi}
+			onAction={handleRetryApiLoad}
 		/>
-		<TablePagination
-			count={resultCount}
-			page={activePage}
-			perPage={SCHOOLS_TABLE_PAGE_SIZE}
-			onPageChange={handlePageChange}
+	{:else}
+		<SchoolsListSection
+			schools={data.schools}
+			classCountBySchoolId={data.classCountBySchoolId}
+			isLoading={isLoadingSchools}
+			onViewSchool={handleViewSchool}
+			onEditSchool={handleEditSchool}
+			onDeleteSchool={handleDeleteSchool}
+			onAddSchool={handleAddSchool}
 		/>
 	{/if}
 </div>
+
+{#key schoolFormSessionId}
+	<SchoolForm
+		bind:open={isSchoolFormOpen}
+		initialValues={schoolFormInitialValues}
+		isEditing={isEditingSchool}
+		isSaving={isSavingSchool}
+		onSubmit={handleSubmitSchool}
+		onClose={handleCloseSchoolForm}
+	/>
+{/key}
+
+<ConfirmDialog
+	bind:open={isDeleteDialogOpen}
+	title={deleteDialogTitle}
+	description={deleteDialogDescription}
+	confirmLabel="Delete"
+	isConfirming={isDeletingSchool}
+	onConfirm={handleConfirmDeleteSchool}
+	onCancel={handleCancelDeleteSchool}
+/>

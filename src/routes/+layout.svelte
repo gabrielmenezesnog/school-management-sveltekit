@@ -1,5 +1,6 @@
 <script lang="ts">
 	import favicon from '$lib/assets/favicon.svg';
+	import { Toaster } from '$lib/components/atoms/Sonner/index.js';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
 	import { MAIN_CONTENT_ID } from '$lib/constants/routes';
 	import { isSchoolsSectionPath } from '$lib/utils/isSchoolsSectionPath';
@@ -48,3 +49,5 @@
 		{@render children()}
 	</main>
 </div>
+
+<Toaster />

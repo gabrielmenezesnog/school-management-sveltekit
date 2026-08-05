@@ -1,12 +1,33 @@
-import { error } from '@sveltejs/kit';
-import { HTTP_INTERNAL_SERVER_ERROR } from '$lib/constants/httpStatus';
+import { API_UNAVAILABLE_MESSAGE } from '$lib/constants/apiAvailability';
 import { buildClassCountBySchoolId } from '$lib/features/classes/buildClassCountBySchoolId';
+import type { ClassCountBySchoolId } from '$lib/features/classes/types';
 import { ApiRequestError } from '$lib/services/api/ApiRequestError';
 import { classesService } from '$lib/services/api/classesService';
 import { schoolsService } from '$lib/services/api/schoolsService';
+import type { School } from '$lib/types/School';
 import type { PageLoad, PageLoadEvent } from './$types';
 
-export const load: PageLoad = async function loadSchoolsPage({ fetch }: PageLoadEvent) {
+export interface SchoolsPageLoadResult {
+	schools: School[];
+	classCountBySchoolId: ClassCountBySchoolId;
+	apiUnavailableMessage: string | null;
+}
+
+function getApiUnavailableMessage(loadError: Error): string {
+	if (loadError instanceof ApiRequestError) {
+		return loadError.message;
+	}
+
+	if (loadError.message) {
+		return loadError.message;
+	}
+
+	return API_UNAVAILABLE_MESSAGE;
+}
+
+export const load: PageLoad = async function loadSchoolsPage({
+	fetch
+}: PageLoadEvent): Promise<SchoolsPageLoadResult> {
 	try {
 		const [schools, schoolClasses] = await Promise.all([
 			schoolsService.list(fetch),
@@ -15,17 +36,22 @@ export const load: PageLoad = async function loadSchoolsPage({ fetch }: PageLoad
 
 		return {
 			schools,
-			classCountBySchoolId: buildClassCountBySchoolId(schoolClasses)
+			classCountBySchoolId: buildClassCountBySchoolId(schoolClasses),
+			apiUnavailableMessage: null
 		};
 	} catch (loadError) {
-		if (loadError instanceof ApiRequestError) {
-			error(loadError.status, loadError.message);
-		}
-
 		if (loadError instanceof Error) {
-			error(HTTP_INTERNAL_SERVER_ERROR, loadError.message);
+			return {
+				schools: [],
+				classCountBySchoolId: {},
+				apiUnavailableMessage: getApiUnavailableMessage(loadError)
+			};
 		}
 
-		error(HTTP_INTERNAL_SERVER_ERROR, 'Failed to load schools');
+		return {
+			schools: [],
+			classCountBySchoolId: {},
+			apiUnavailableMessage: API_UNAVAILABLE_MESSAGE
+		};
 	}
 };
