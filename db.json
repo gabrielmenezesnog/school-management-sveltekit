@@ -1,0 +1,62 @@
+{
+	"schools": [
+		{
+			"id": "1",
+			"name": "Escola Municipal João da Silva",
+			"address": "Rua das Flores, 123 - Centro",
+			"phone": "(11) 3456-7890",
+			"director": "Maria Aparecida Souza",
+			"studentsCount": 320
+		},
+		{
+			"id": "2",
+			"name": "Escola Municipal Monteiro Lobato",
+			"address": "Av. Brasil, 987 - Jardim América",
+			"phone": "(11) 2345-6789",
+			"director": "Carlos Eduardo Pereira",
+			"studentsCount": 210
+		},
+		{
+			"id": "3",
+			"name": "Escola Municipal Cecília Meireles",
+			"address": "Rua dos Ipês, 45 - Vila Nova",
+			"phone": "(11) 4567-8901",
+			"director": "Fernanda Lima Costa",
+			"studentsCount": 480
+		}
+	],
+	"classes": [
+		{
+			"id": "1",
+			"name": "1º Ano A",
+			"shift": "Manhã",
+			"grade": "1º Ano - Ensino Fundamental",
+			"studentsCount": 28,
+			"schoolId": "1"
+		},
+		{
+			"id": "2",
+			"name": "2º Ano B",
+			"shift": "Tarde",
+			"grade": "2º Ano - Ensino Fundamental",
+			"studentsCount": 25,
+			"schoolId": "1"
+		},
+		{
+			"id": "3",
+			"name": "Turma Única - Jardim I",
+			"shift": "Manhã",
+			"grade": "Educação Infantil",
+			"studentsCount": 20,
+			"schoolId": "2"
+		},
+		{
+			"id": "4",
+			"name": "5º Ano A",
+			"shift": "Tarde",
+			"grade": "5º Ano - Ensino Fundamental",
+			"studentsCount": 30,
+			"schoolId": "3"
+		}
+	]
+}
