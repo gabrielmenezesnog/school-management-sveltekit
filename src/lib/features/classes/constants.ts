@@ -6,7 +6,17 @@ export const CLASS_COUNT_INCREMENT = 1;
 
 export const CLASSES_SINGULAR_COUNT = 1;
 
-export const CLASSES_TABLE_COLUMN_COUNT = 6;
+export const CLASSES_TABLE_COLUMN_COUNT = 7;
+
+export const CLASSES_TABLE_ACTION_ICON_SIZE_PX = 16;
+
+export const CLASSES_TABLE_EMPTY_ICON_SIZE_PX = 48;
+
+export const CLASSES_TABLE_ADD_ICON_SIZE_PX = 16;
+
+export const CLASS_STUDENTS_MIN = 1;
+
+export const CLASS_STUDENTS_MAX = 60;
 
 export const CLASS_LEVEL_LABELS: Record<SchoolClassLevel, string> = {
 	infantil: 'Early childhood',
