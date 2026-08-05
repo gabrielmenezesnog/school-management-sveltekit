@@ -170,12 +170,7 @@
 		</div>
 	</div>
 
-	<div
-		class={cn(
-			'flex w-full items-center gap-3',
-			'md:ml-auto md:w-auto md:justify-end'
-		)}
-	>
+	<div class={cn('flex w-full items-center gap-3', 'md:ml-auto md:w-auto md:justify-end')}>
 		{#if hasActiveFilters}
 			<button
 				type="button"

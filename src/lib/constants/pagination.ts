@@ -1,0 +1,7 @@
+export const PAGINATION_FIRST_PAGE = 1;
+
+export const PAGINATION_DEFAULT_PER_PAGE = 10;
+
+export const PAGINATION_DEFAULT_SIBLING_COUNT = 1;
+
+export const PAGINATION_EMPTY_COUNT = 0;

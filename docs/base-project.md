@@ -133,11 +133,11 @@ Add others only when a screen needs them.
 
 ### DECIDED — Skeleton loading via shadcn-svelte
 
-| Choice       | Value                                                                                     | Why                                                                                          |
-| ------------ | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| Loading UX   | **Skeleton placeholders** (not spinners as the primary pattern)                           | Clearer layout while schools/classes data loads                                              |
+| Choice       | Value                                                                                     | Why                                                                                             |
+| ------------ | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Loading UX   | **Skeleton placeholders** (not spinners as the primary pattern)                           | Clearer layout while schools/classes data loads                                                 |
 | Component    | **shadcn-svelte `skeleton`** (`pnpm dlx shadcn-svelte@latest add skeleton`)               | Official component; Tailwind-styled pulse blocks; lives in `src/lib/components/atoms/Skeleton/` |
-| Fallback lib | **None** — only add a dedicated skeleton library if shadcn `Skeleton` proves insufficient | Avoids an extra dependency for a solved use case                                             |
+| Fallback lib | **None** — only add a dedicated skeleton library if shadcn `Skeleton` proves insufficient | Avoids an extra dependency for a solved use case                                                |
 
 Usage pattern:
 
@@ -334,20 +334,20 @@ Do not install anything from this list until the **OPEN** items below are confir
 
 Confirm or override:
 
-| #   | Topic                                                                           | Proposed        | Your call                |
-| --- | ------------------------------------------------------------------------------- | --------------- | ------------------------ |
-| 0   | Semantic + readable + **WCAG 2.2 AA** as core quality goals; comments forbidden | Yes             | Locked                   |
-| 1   | Tailwind CSS v4                                                                 | Yes (mandatory) | Locked                   |
-| 2   | shadcn-svelte + Bits UI installed into `components/atoms/`                      | Yes             | Locked                   |
-| 3   | No separate `ui/` folder — atomic design only (`atoms` / `molecules` / `organisms`) | Yes         | Locked                   |
-| 4   | Icons `@lucide/svelte`                                                          | Yes             | Locked                   |
-| 5   | Forms: Superforms + Zod (no Formsnap)                                           | Option A        | Confirm A or B           |
-| 6   | Toasts: svelte-sonner                                                           | Yes             | Locked                   |
-| 7   | Skeleton loading via shadcn `Skeleton` (no extra lib)                           | Yes             | Locked                   |
-| 8   | Dark mode deferred                                                              | Yes             | Confirm                  |
-| 9   | Vitest + Testing Library                                                        | Option A        | Confirm A or B           |
-| 10  | CI: GitHub Actions, no deploy                                                   | Option A        | Confirm A or B           |
-| 11  | English everywhere (incl. seed data)                                            | Yes             | Locked                   |
+| #   | Topic                                                                               | Proposed        | Your call      |
+| --- | ----------------------------------------------------------------------------------- | --------------- | -------------- |
+| 0   | Semantic + readable + **WCAG 2.2 AA** as core quality goals; comments forbidden     | Yes             | Locked         |
+| 1   | Tailwind CSS v4                                                                     | Yes (mandatory) | Locked         |
+| 2   | shadcn-svelte + Bits UI installed into `components/atoms/`                          | Yes             | Locked         |
+| 3   | No separate `ui/` folder — atomic design only (`atoms` / `molecules` / `organisms`) | Yes             | Locked         |
+| 4   | Icons `@lucide/svelte`                                                              | Yes             | Locked         |
+| 5   | Forms: Superforms + Zod (no Formsnap)                                               | Option A        | Confirm A or B |
+| 6   | Toasts: svelte-sonner                                                               | Yes             | Locked         |
+| 7   | Skeleton loading via shadcn `Skeleton` (no extra lib)                               | Yes             | Locked         |
+| 8   | Dark mode deferred                                                                  | Yes             | Confirm        |
+| 9   | Vitest + Testing Library                                                            | Option A        | Confirm A or B |
+| 10  | CI: GitHub Actions, no deploy                                                       | Option A        | Confirm A or B |
+| 11  | English everywhere (incl. seed data)                                                | Yes             | Locked         |
 
 ---
 

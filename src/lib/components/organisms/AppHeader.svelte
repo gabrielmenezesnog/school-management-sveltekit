@@ -19,11 +19,7 @@
 </script>
 
 <header class={cn('z-header sticky top-0', 'bg-navy-800 shadow-(--header-shadow)')}>
-	<div
-		class={cn(
-			'mx-auto flex h-16 w-full max-w-7xl items-center gap-4 px-4 sm:gap-8 sm:px-6'
-		)}
-	>
+	<div class={cn('mx-auto flex h-16 w-full max-w-7xl items-center gap-4 px-4 sm:gap-8 sm:px-6')}>
 		<a
 			href={schoolsHref}
 			aria-label="{APP_BRAND_NAME} home"
