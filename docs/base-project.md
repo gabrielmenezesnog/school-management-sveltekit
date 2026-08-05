@@ -88,27 +88,26 @@ No alternative CSS framework (Bootstrap, UnoCSS, plain CSS modules as primary sy
 | Library        | **[shadcn-svelte](https://www.shadcn-svelte.com/)** | Accessible primitives + owned source; fits Svelte 5 / Tailwind v4 |
 | Headless layer | **Bits UI** (pulled in by shadcn-svelte)            | Keyboard, focus, ARIA — supports the WCAG differential            |
 | Style preset   | `new-york`                                          | Current shadcn-svelte default                                     |
-| Install path   | `src/lib/components/ui/`                            | CLI default; generated files we own and can edit                  |
+| Install path   | `src/lib/components/atoms/`                         | Atomic design primitives; shadcn CLI `ui` alias points here       |
 | Theming        | CSS variables (OKLCH) from shadcn init              | Light theme first; dark mode optional via `mode-watcher` later    |
 
 **Not chosen:** Flowbite-Svelte, Skeleton, DaisyUI, Melt UI alone, or a fully hand-rolled design system from scratch.
 
 ### How this maps to atomic design
 
-shadcn-svelte components are the **primitive/atom source**. Domain UI still follows the project layout:
+shadcn-svelte components are installed **into `atoms/`** (no separate `ui/` folder). Domain UI follows classic atomic design:
 
 ```
 src/lib/components/
-  ui/            # shadcn-svelte primitives (Button, Input, Dialog, Table, …)
+  atoms/         # primitives (Input, Select, Label, Button, …) — owned shadcn/Bits sources
   molecules/     # SearchBar, FormField, ConfirmDialog, SchoolCard, …
   organisms/     # SchoolsTable, SchoolForm, ClassesTable, ClassForm, AppHeader, …
 ```
 
 Rules:
 
-- Prefer composing `ui/*` inside molecules/organisms instead of duplicating primitives under `atoms/`.
-- Do **not** invent a second Button/Input that reimplements shadcn — wrap or re-export if a project-specific API is needed.
-- If a thin `atoms/` folder stays empty, remove it rather than mirroring `ui/`.
+- Compose `atoms/*` inside molecules/organisms — do not add a parallel `ui/` tree.
+- Do **not** invent a second Button/Input that reimplements an existing atom.
 - Organisms receive data via props; routes/`load` + services own fetching (see [`../CLAUDE.md`](../CLAUDE.md)).
 
 ### Initial shadcn components to add (when scaffolding UI)
@@ -137,7 +136,7 @@ Add others only when a screen needs them.
 | Choice       | Value                                                                                     | Why                                                                                          |
 | ------------ | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | Loading UX   | **Skeleton placeholders** (not spinners as the primary pattern)                           | Clearer layout while schools/classes data loads                                              |
-| Component    | **shadcn-svelte `skeleton`** (`pnpm dlx shadcn-svelte@latest add skeleton`)               | Official component; Tailwind-styled pulse blocks; lives in `src/lib/components/ui/skeleton/` |
+| Component    | **shadcn-svelte `skeleton`** (`pnpm dlx shadcn-svelte@latest add skeleton`)               | Official component; Tailwind-styled pulse blocks; lives in `src/lib/components/atoms/Skeleton/` |
 | Fallback lib | **None** — only add a dedicated skeleton library if shadcn `Skeleton` proves insufficient | Avoids an extra dependency for a solved use case                                             |
 
 Usage pattern:
@@ -318,9 +317,9 @@ Default: **Option A** (CI only). Adapter stays `@sveltejs/adapter-auto` until a 
 Order of work when scaffolding the remaining base:
 
 1. Add Tailwind v4 (`@tailwindcss/vite`) + global CSS entry
-2. Init shadcn-svelte (`pnpm dlx shadcn-svelte@latest init`) — `new-york`, `ui/` path
+2. Init shadcn-svelte (`pnpm dlx shadcn-svelte@latest init`) — `new-york`, install path `atoms/` (`components.json` `ui` alias → `$lib/components/atoms`)
 3. Install `@lucide/svelte`, `clsx`, `tailwind-merge`, `tailwind-variants`, `tw-animate-css`, `svelte-sonner`
-4. Add core shadcn components listed in §4
+4. Add core shadcn components listed in §4 into `atoms/`
 5. Add Zod + sveltekit-superforms (+ `@testing-library/svelte` if Option A)
 6. Wire `PUBLIC_API_BASE_URL`, `cn()` util, empty service stubs if not present
 7. Add GitHub Actions workflow
@@ -339,8 +338,8 @@ Confirm or override:
 | --- | ------------------------------------------------------------------------------- | --------------- | ------------------------ |
 | 0   | Semantic + readable + **WCAG 2.2 AA** as core quality goals; comments forbidden | Yes             | Locked                   |
 | 1   | Tailwind CSS v4                                                                 | Yes (mandatory) | Locked                   |
-| 2   | shadcn-svelte + Bits UI in `components/ui/`                                     | Yes             | Locked unless you object |
-| 3   | Skip parallel `atoms/` — `ui/` is the primitive layer                           | Yes             | Confirm                  |
+| 2   | shadcn-svelte + Bits UI installed into `components/atoms/`                      | Yes             | Locked                   |
+| 3   | No separate `ui/` folder — atomic design only (`atoms` / `molecules` / `organisms`) | Yes         | Locked                   |
 | 4   | Icons `@lucide/svelte`                                                          | Yes             | Locked                   |
 | 5   | Forms: Superforms + Zod (no Formsnap)                                           | Option A        | Confirm A or B           |
 | 6   | Toasts: svelte-sonner                                                           | Yes             | Locked                   |
@@ -358,7 +357,7 @@ Confirm or override:
 Quality first: semantic names + readable structure + WCAG 2.2 AA
 SvelteKit 2 + Svelte 5 (runes) + TypeScript
 Tailwind CSS v4 + tw-animate-css
-shadcn-svelte (Bits UI) → src/lib/components/ui
+shadcn-svelte (Bits UI) → src/lib/components/atoms
   including Skeleton for loading states
 @lucide/svelte
 clsx + tailwind-merge + tailwind-variants

@@ -41,7 +41,7 @@ A Figma Make React prototype defines the **screens, components, and interaction 
 | `src/views/SchoolDetailView.tsx`                            | `src/routes/schools/[id]/+page.svelte` + classes table/card            |
 | `src/components/AppHeader.tsx`                              | `src/lib/components/organisms/AppHeader.svelte`                        |
 | `src/components/SearchBar.tsx`                              | `src/lib/components/molecules/SearchBar.svelte`                        |
-| `src/components/Badge.tsx` / `Spinner.tsx`                  | atoms (or `ui/` via shadcn)                                            |
+| `src/components/Badge.tsx` / `Spinner.tsx`                  | atoms                                                                  |
 | `src/components/ConfirmModal.tsx`                           | `molecules/ConfirmDialog.svelte` (shadcn dialog)                       |
 | `src/components/SchoolFormModal.tsx` / `ClassFormModal.tsx` | `organisms/SchoolForm.svelte` / `ClassForm.svelte` (routes or dialogs) |
 | `src/components/Toast.tsx`                                  | svelte-sonner + `stores/toast.svelte.ts`                               |
@@ -169,13 +169,13 @@ src/
           +page.svelte                   # composes ClassForm (edit mode)
   lib/
     components/
-      atoms/                             # smallest reusable pieces — no business logic, no store/service imports
-        Button.svelte
-        Button.svelte.test.ts
-        Input.svelte
-        Select.svelte
-        Badge.svelte
-        Spinner.svelte
+      atoms/                             # primitives (owned shadcn/Bits sources) — no business logic
+        Input/
+        Label/
+        Select/
+        Separator/
+        Badge/
+        Spinner/
       molecules/                         # a few atoms composed together, still purely presentational
         FormField.svelte                 # Input/Select + label + error text
         SearchBar.svelte                 # mirrors reference SearchBar
@@ -224,7 +224,7 @@ Canonical visual system: [`docs/design-system.md`](./docs/design-system.md). Mim
 
 ### Atomic design rules
 
-- **atoms** (`src/lib/components/atoms/`) — the smallest reusable pieces (`Button`, `Input`, `Select`, `Badge`, `Spinner`). No business logic, no imports from `services/`, `stores/`, or `features/`. Everything comes in through typed props; styling and markup only.
+- **atoms** (`src/lib/components/atoms/`) — the smallest reusable pieces (`Input`, `Select`, `Label`, `Badge`, `Spinner`). Owned shadcn/Bits sources live here. No business logic, no imports from `services/`, `stores/`, or `features/`. Everything comes in through typed props; styling and markup only.
 - **molecules** (`src/lib/components/molecules/`) — a small composition of 2+ atoms (`FormField` = `Input`/`Select` + label + error text; `SchoolCard`; `SearchBar`). Still presentational — no direct API/service calls. May accept typed callback props (`onSearch: (query: string) => void`).
 - **organisms** (`src/lib/components/organisms/`) — full domain sections (`SchoolsTable`, `SchoolForm`, `ClassForm`, `AppHeader`). These compose molecules/atoms and know about the domain shape (`School`, `SchoolClass`), but still **receive their data via props** from the route that renders them — a route's `load` function (or a service call in an event handler for a mutation) is the one place that talks to `schoolsService`/`classesService`, not the organism itself.
 - **Global folders only.** Don't create a local `atoms/`/`molecules/`/`organisms/` folder inside `features/<feature>/` — all reusable UI lives in the three folders above. Feature-local, non-reusable helpers (`constants.ts`, `types.ts`, `derive*`/`build*` functions) live in `src/lib/features/<feature>/`, next to (not inside) the organism they support.

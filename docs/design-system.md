@@ -801,11 +801,11 @@ In `src/app.css` (SvelteKit) or `src/index.css` (Vite), declare the tokens insid
 
 | Component              | Layer    | File                                               |
 | ---------------------- | -------- | -------------------------------------------------- |
-| `Button`               | atom     | `components/atoms/Button.svelte`                   |
-| `Input`                | atom     | `components/atoms/Input.svelte`                    |
-| `Select`               | atom     | `components/atoms/Select.svelte`                   |
-| `Badge`                | atom     | `components/atoms/Badge.svelte`                    |
-| `Spinner`              | atom     | `components/atoms/Spinner.svelte`                  |
+| `Button`               | atom     | `components/atoms/Button/`                         |
+| `Input`                | atom     | `components/atoms/Input/`                          |
+| `Select`               | atom     | `components/atoms/Select/`                         |
+| `Badge`                | atom     | `components/atoms/Badge/`                          |
+| `Spinner`              | atom     | `components/atoms/Spinner/`                        |
 | `FormField`            | molecule | `components/molecules/FormField.svelte`            |
 | `SearchBar`            | molecule | `components/molecules/SearchBar.svelte`            |
 | `ConfirmDialog`        | molecule | `components/molecules/ConfirmDialog.svelte`        |
@@ -818,7 +818,7 @@ In `src/app.css` (SvelteKit) or `src/index.css` (Vite), declare the tokens insid
 | `SchoolsTableSkeleton` | molecule | `components/molecules/SchoolsTableSkeleton.svelte` |
 | `SchoolCardSkeleton`   | molecule | `components/molecules/SchoolCardSkeleton.svelte`   |
 
-All shadcn-svelte primitives live in `src/lib/components/ui/` and are consumed by the layers above.
+shadcn-svelte primitives are installed under `src/lib/components/atoms/` and composed by molecules/organisms.
 
 ---
 
