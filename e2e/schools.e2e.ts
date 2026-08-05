@@ -1,4 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+
+const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 
 const E2E_SCHOOL_NAME = `E2E School ${Date.now()}`;
 const E2E_SCHOOL_UPDATED_NAME = `${E2E_SCHOOL_NAME} Updated`;
@@ -113,5 +116,28 @@ test.describe('Schools search and filters', () => {
 		await page.getByRole('button', { name: `Delete ${schoolName}` }).click();
 		await page.getByRole('button', { name: 'Delete', exact: true }).click();
 		await expect(page.getByText(`${schoolName} deleted successfully.`)).toBeVisible();
+	});
+});
+
+test.describe('Accessibility', () => {
+	test('schools list has no automatically detectable WCAG violations', async ({ page }) => {
+		await page.goto('/schools');
+		await expect(page.getByRole('heading', { name: 'Schools', level: 1 })).toBeVisible();
+
+		const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
+
+		expect(results.violations).toEqual([]);
+	});
+
+	test('the new school dialog has no automatically detectable WCAG violations', async ({
+		page
+	}) => {
+		await page.goto('/schools');
+		await page.getByRole('button', { name: 'New school' }).click();
+		await expect(page.getByRole('heading', { name: 'New school' })).toBeVisible();
+
+		const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
+
+		expect(results.violations).toEqual([]);
 	});
 });
