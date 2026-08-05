@@ -40,7 +40,11 @@
 <div class="flex min-h-screen flex-col">
 	<AppHeader {isSchoolsNavActive} />
 
-	<main id={MAIN_CONTENT_ID} class="flex-1" tabindex="-1">
+	<main
+		id={MAIN_CONTENT_ID}
+		class={cn('mx-auto w-full max-w-7xl flex-1', 'px-4 py-6 sm:px-6 sm:py-8')}
+		tabindex="-1"
+	>
 		{@render children()}
 	</main>
 </div>
