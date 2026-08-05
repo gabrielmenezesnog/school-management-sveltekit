@@ -4,6 +4,8 @@ Web application for managing public schools and their classes for a city educati
 
 Product name: **gerencie.me**.
 
+**Live demo:** [school-management-sveltekit-rho.vercel.app/schools](https://school-management-sveltekit-rho.vercel.app/schools)
+
 ## Challenge requirements
 
 Mapping of the original technical challenge brief to where each item is implemented.
