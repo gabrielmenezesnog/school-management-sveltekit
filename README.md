@@ -35,7 +35,7 @@ Schools and classes management are implemented end to end for the challenge scop
 | Package manager | [pnpm](https://pnpm.io/)                                                                                             |
 | Version control | Git                                                                                                                  |
 
-Full library decisions (forms, skeleton loading, CI, and more): [`base-project.md`](./base-project.md).
+Full library decisions (forms, skeleton loading, CI, and more): [`base-project.md`](./docs/base-project.md).
 
 ## Prerequisites
 
@@ -58,7 +58,7 @@ The app and the mock API are separate processes. Run both.
 pnpm run json-server
 ```
 
-Serves [`db.json`](../db.json) at `http://localhost:3001`:
+Serves [`db.json`](./db.json) at `http://localhost:3001`:
 
 | Method                         | Endpoint                        |
 | ------------------------------ | ------------------------------- |
@@ -129,14 +129,15 @@ pnpm run test
 
 ```
 CLAUDE.md
+README.md
 db.json
 docs/
-  README.md
   code-rules.md
   base-project.md
   design-system.md
 e2e/
   schools.e2e.ts
+  classes.e2e.ts
 src/
   app.css
   lib/
@@ -165,13 +166,13 @@ vite.config.ts
 package.json
 ```
 
-Atomic design and folder conventions: [`../CLAUDE.md`](../CLAUDE.md).
+Atomic design and folder conventions: [`CLAUDE.md`](./CLAUDE.md).
 
 ## Documentation
 
-| Doc                                      | Purpose                                                         |
-| ---------------------------------------- | --------------------------------------------------------------- |
-| [`../CLAUDE.md`](../CLAUDE.md)           | Project rules entry point for agents                            |
-| [`code-rules.md`](./code-rules.md)       | Coding conventions and verification                             |
-| [`base-project.md`](./base-project.md)   | Technology and library decisions                                |
-| [`design-system.md`](./design-system.md) | Typography, color, components, motion (canonical visual system) |
+| Doc                                                | Purpose                                                         |
+| -------------------------------------------------- | --------------------------------------------------------------- |
+| [`CLAUDE.md`](./CLAUDE.md)                         | Project rules entry point for agents                            |
+| [`docs/code-rules.md`](./docs/code-rules.md)       | Coding conventions and verification                             |
+| [`docs/base-project.md`](./docs/base-project.md)   | Technology and library decisions                                |
+| [`docs/design-system.md`](./docs/design-system.md) | Typography, color, components, motion (canonical visual system) |

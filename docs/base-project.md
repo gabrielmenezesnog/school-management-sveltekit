@@ -177,14 +177,14 @@ Usage pattern:
 
 Validation lives next to feature form types (`src/lib/features/schools/`, `src/lib/features/classes/`), not inside organisms as ad-hoc checks.
 
-### OPEN — confirm Formsnap
+### DECIDED — no Formsnap
 
-| Option              | Notes                                                                                    |
-| ------------------- | ---------------------------------------------------------------------------------------- |
-| **A (recommended)** | Superforms + Zod only; use shadcn `Label`/`Input`/`Field`-style markup manually          |
-| **B**               | Also install **Formsnap** (shadcn-svelte form companion) for generated form field wiring |
+| Option         | Notes                                                                                    |
+| -------------- | ---------------------------------------------------------------------------------------- |
+| **A (chosen)** | Superforms + Zod only; use shadcn `Label`/`Input`/`Field`-style markup manually          |
+| B              | Also install **Formsnap** (shadcn-svelte form companion) for generated form field wiring |
 
-Default for this doc until you say otherwise: **Option A**.
+Implemented as Option A: `SchoolForm.svelte` / `ClassForm.svelte` wire Superforms + Zod directly with `FormField`, no Formsnap dependency installed.
 
 ---
 
@@ -234,14 +234,14 @@ Notes:
 
 E2E scenarios must cover the mandatory flows: school CRUD, class CRUD under a school, search/filter.
 
-### OPEN — component testing helper
+### DECIDED — no component testing helper
 
-| Option              | Notes                                                |
-| ------------------- | ---------------------------------------------------- |
-| **A (recommended)** | `@testing-library/svelte` for Vitest component tests |
-| **B**               | Vitest + native `mount` / Svelte testing only        |
+| Option          | Notes                                                |
+| --------------- | ---------------------------------------------------- |
+| A (recommended) | `@testing-library/svelte` for Vitest component tests |
+| **B (chosen)**  | Vitest + native `mount` / Svelte testing only        |
 
-Default: **Option A**.
+Implemented as Option B: `@testing-library/svelte` is not a dependency; unit tests cover feature logic, form schemas, and services directly with Vitest.
 
 ---
 
@@ -277,14 +277,14 @@ Pipeline on push/PR to `main` (and PR branches):
 4. `pnpm run test:unit -- --run`
 5. `pnpm run test:e2e` (with json-server + app started, or Playwright `webServer` config)
 
-### OPEN — deploy target
+### DECIDED — no deploy target
 
-| Option | Notes                                                         |
-| ------ | ------------------------------------------------------------- |
-| **A**  | No deploy — CI only (enough for the challenge)                |
-| **B**  | Vercel / Netlify / Cloudflare Pages via `@sveltejs/adapter-*` |
+| Option         | Notes                                                         |
+| -------------- | ------------------------------------------------------------- |
+| **A (chosen)** | No deploy — CI only (enough for the challenge)                |
+| B              | Vercel / Netlify / Cloudflare Pages via `@sveltejs/adapter-*` |
 
-Default: **Option A** (CI only). Adapter stays `@sveltejs/adapter-auto` until a host is chosen.
+Implemented as Option A: `.github/workflows/ci.yml` runs install/check/lint/unit/e2e only. Adapter stays `@sveltejs/adapter-auto` until a host is chosen.
 
 ---
 
@@ -324,7 +324,7 @@ Order of work when scaffolding the remaining base:
 6. Wire `PUBLIC_API_BASE_URL`, `cn()` util, empty service stubs if not present
 7. Add GitHub Actions workflow
 8. Translate `db.json` seed to English
-9. Update [`README.md`](./README.md) to English (challenge delivery language)
+9. Update [`README.md`](../README.md) to English (challenge delivery language)
 
 Do not install anything from this list until the **OPEN** items below are confirmed (or defaults accepted).
 
@@ -334,20 +334,20 @@ Do not install anything from this list until the **OPEN** items below are confir
 
 Confirm or override:
 
-| #   | Topic                                                                               | Proposed        | Your call      |
-| --- | ----------------------------------------------------------------------------------- | --------------- | -------------- |
-| 0   | Semantic + readable + **WCAG 2.2 AA** as core quality goals; comments forbidden     | Yes             | Locked         |
-| 1   | Tailwind CSS v4                                                                     | Yes (mandatory) | Locked         |
-| 2   | shadcn-svelte + Bits UI installed into `components/atoms/`                          | Yes             | Locked         |
-| 3   | No separate `ui/` folder — atomic design only (`atoms` / `molecules` / `organisms`) | Yes             | Locked         |
-| 4   | Icons `@lucide/svelte`                                                              | Yes             | Locked         |
-| 5   | Forms: Superforms + Zod (no Formsnap)                                               | Option A        | Confirm A or B |
-| 6   | Toasts: svelte-sonner                                                               | Yes             | Locked         |
-| 7   | Skeleton loading via shadcn `Skeleton` (no extra lib)                               | Yes             | Locked         |
-| 8   | Dark mode deferred                                                                  | Yes             | Confirm        |
-| 9   | Vitest + Testing Library                                                            | Option A        | Confirm A or B |
-| 10  | CI: GitHub Actions, no deploy                                                       | Option A        | Confirm A or B |
-| 11  | English everywhere (incl. seed data)                                                | Yes             | Locked         |
+| #   | Topic                                                                               | Proposed        | Your call |
+| --- | ----------------------------------------------------------------------------------- | --------------- | --------- |
+| 0   | Semantic + readable + **WCAG 2.2 AA** as core quality goals; comments forbidden     | Yes             | Locked    |
+| 1   | Tailwind CSS v4                                                                     | Yes (mandatory) | Locked    |
+| 2   | shadcn-svelte + Bits UI installed into `components/atoms/`                          | Yes             | Locked    |
+| 3   | No separate `ui/` folder — atomic design only (`atoms` / `molecules` / `organisms`) | Yes             | Locked    |
+| 4   | Icons `@lucide/svelte`                                                              | Yes             | Locked    |
+| 5   | Forms: Superforms + Zod (no Formsnap)                                               | Option A        | Locked    |
+| 6   | Toasts: svelte-sonner                                                               | Yes             | Locked    |
+| 7   | Skeleton loading via shadcn `Skeleton` (no extra lib)                               | Yes             | Locked    |
+| 8   | Dark mode deferred                                                                  | Yes             | Confirm   |
+| 9   | Vitest, no Testing Library                                                          | Option B        | Locked    |
+| 10  | CI: GitHub Actions, no deploy                                                       | Option A        | Locked    |
+| 11  | English everywhere (incl. seed data)                                                | Yes             | Locked    |
 
 ---
 
