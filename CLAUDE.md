@@ -12,7 +12,7 @@ All project docs live under **[`docs/`](./docs/)**, except this file. New docs u
 | **[docs/code-rules.md](./docs/code-rules.md)**       | Before writing or changing code                                                | TypeScript, Svelte 5 / SvelteKit conventions, components, services/stores/utils, error handling, testing, verification (`svelte-check` + ESLint) |
 | **[docs/base-project.md](./docs/base-project.md)**   | Before adding libraries, UI primitives, forms, CI, or scaffolding stack pieces | Locked tech/stack decisions (Tailwind, shadcn-svelte, icons, forms, skeleton loading, etc.) and install plan                                     |
 | **[docs/design-system.md](./docs/design-system.md)** | **Before any UI, styling, or visual work** — mandatory                         | Typography, color (OKLCH tokens), spacing, components, motion, WCAG AA visuals — civic Swiss system. **Source of truth** for look-and-feel       |
-| **[docs/README.md](./docs/README.md)**               | When changing install/run/test instructions or delivery docs                   | How to install, run the app + json-server, and run tests (keep in sync with reality)                                                             |
+| **[README.md](./README.md)**                         | When changing install/run/test instructions or delivery docs                   | How to install, run the app + json-server, and run tests (keep in sync with reality)                                                             |
 
 Optional (local only, gitignored — regenerate, never commit):
 
@@ -142,8 +142,8 @@ This project uses **atomic design** for all reusable UI (atoms → molecules →
 
 ```
 CLAUDE.md                                # agent entry — references docs/
+README.md                                # install, run, test instructions
 docs/
-  README.md                              # install, run, test instructions
   code-rules.md                          # TypeScript / Svelte / verification rules
   base-project.md                        # locked stack and library decisions
   design-system.md                       # visual system (type, color, components)

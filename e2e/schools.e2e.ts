@@ -56,3 +56,62 @@ test.describe('Schools CRUD', () => {
 		).toHaveCount(0);
 	});
 });
+
+test.describe('Schools search and filters', () => {
+	test('narrows results by search text and by type/status filters', async ({ page }) => {
+		const schoolName = `E2E Filter School ${Date.now()}`;
+		const principalName = `E2E Filter Principal ${Date.now()}`;
+		const viewClassesButton = () =>
+			page.getByRole('button', { name: `View classes for ${schoolName}` });
+
+		await page.goto('/schools');
+
+		const schoolFormDialog = page.getByRole('dialog', { name: 'New school' });
+		const filterCard = page.getByRole('region', { name: 'School filters' });
+
+		await page.getByRole('button', { name: 'New school' }).click();
+		await fillRequiredSchoolFields(page, schoolName);
+		await page.getByRole('textbox', { name: 'Principal' }).fill(principalName);
+		await schoolFormDialog.getByRole('button', { name: 'School type' }).click();
+		await page.getByRole('option', { name: 'Federal' }).click();
+		await schoolFormDialog.getByRole('button', { name: 'Status', exact: true }).click();
+		await page.getByRole('option', { name: 'Inactive', exact: true }).click();
+		await schoolFormDialog.getByRole('button', { name: 'Create school' }).click();
+		await expect(page.getByText(`${schoolName} created successfully.`)).toBeVisible();
+
+		const searchBox = page.getByRole('searchbox');
+
+		await searchBox.fill(schoolName);
+		await expect(viewClassesButton()).toBeVisible();
+
+		await searchBox.fill(principalName);
+		await expect(viewClassesButton()).toBeVisible();
+
+		await searchBox.fill('no-school-matches-this-query');
+		await expect(page.getByText('No schools found')).toBeVisible();
+		await expect(viewClassesButton()).toHaveCount(0);
+
+		await searchBox.fill(schoolName);
+		await expect(viewClassesButton()).toBeVisible();
+
+		await filterCard.getByRole('button', { name: 'Type', exact: true }).click();
+		await page.getByRole('option', { name: 'Municipal' }).click();
+		await expect(page.getByText('No schools found')).toBeVisible();
+
+		await filterCard.getByRole('button', { name: 'Type', exact: true }).click();
+		await page.getByRole('option', { name: 'Federal' }).click();
+		await expect(viewClassesButton()).toBeVisible();
+
+		await filterCard.getByRole('button', { name: 'Status', exact: true }).click();
+		await page.getByRole('option', { name: 'Active', exact: true }).click();
+		await expect(page.getByText('No schools found')).toBeVisible();
+
+		await filterCard.getByRole('button', { name: 'Status', exact: true }).click();
+		await page.getByRole('option', { name: 'Inactive', exact: true }).click();
+		await expect(viewClassesButton()).toBeVisible();
+
+		await page.getByRole('button', { name: `Delete ${schoolName}` }).click();
+		await page.getByRole('button', { name: 'Delete', exact: true }).click();
+		await expect(page.getByText(`${schoolName} deleted successfully.`)).toBeVisible();
+	});
+});
