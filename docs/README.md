@@ -6,35 +6,34 @@ Product name: **gerencie.me**.
 
 ## Status
 
-Scaffold + app shell in progress. Schools/classes CRUD from the challenge brief is still being built on top of this foundation.
+Schools and classes management are implemented end to end for the challenge scope.
 
 **In place today**
 
 - App shell: sticky `AppHeader`, skip link, `/` → `/schools`
-- Design tokens + Tailwind CSS v4 theme (`src/app.css`)
-- Schools landing placeholder (`/schools`)
-- Brand, routes, and path helpers under `src/lib/`
-
-**Planned (challenge scope)**
-
-- List / create / edit / delete schools
-- Search and filter schools
-- List / create / edit / delete classes by school
+- Design tokens + Tailwind CSS v4 theme (`src/app.css`) and shadcn-svelte atoms
+- Schools list with search, type/status filters, pagination, and skeleton loading
+- School create / edit / delete (Superforms + Zod dialogs, confirm delete, toasts)
+- School detail (`/schools/[id]`) with `SchoolCard` and classes table
+- Class create / edit / delete on school detail (Superforms + Zod dialogs, confirm delete, toasts)
+- Soft-fail empty state when json-server is unavailable; detail error page
+- Unit tests (Vitest) and schools/classes CRUD E2E (Playwright)
 
 ## Tech stack
 
-| Layer           | Choice                                                                                                                     |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| App             | [SvelteKit](https://svelte.dev/docs/kit) `^2.63` + [Svelte 5](https://svelte.dev/docs/svelte/what-are-runes) (runes)       |
-| Language        | [TypeScript](https://www.typescriptlang.org/) (strict)                                                                     |
-| Markup / styles | HTML5 + [Tailwind CSS v4](https://tailwindcss.com/) (+ shadcn-svelte planned — see [`base-project.md`](./base-project.md)) |
-| Icons           | [`@lucide/svelte`](https://lucide.dev/)                                                                                    |
-| Mock API        | [json-server](https://github.com/typicode/json-server) `0.17.4`                                                            |
-| Unit tests      | [Vitest](https://vitest.dev/)                                                                                              |
-| E2E tests       | [Playwright](https://playwright.dev/)                                                                                      |
-| Quality         | [ESLint](https://eslint.org/) + [Prettier](https://prettier.io/)                                                           |
-| Package manager | [pnpm](https://pnpm.io/)                                                                                                   |
-| Version control | Git                                                                                                                        |
+| Layer           | Choice                                                                                                               |
+| --------------- | -------------------------------------------------------------------------------------------------------------------- |
+| App             | [SvelteKit](https://svelte.dev/docs/kit) `^2.63` + [Svelte 5](https://svelte.dev/docs/svelte/what-are-runes) (runes) |
+| Language        | [TypeScript](https://www.typescriptlang.org/) (strict)                                                               |
+| Markup / styles | HTML5 + [Tailwind CSS v4](https://tailwindcss.com/) + [shadcn-svelte](https://www.shadcn-svelte.com/)                |
+| Forms           | [Zod](https://zod.dev/) + [sveltekit-superforms](https://superforms.rocks/)                                          |
+| Icons           | [`@lucide/svelte`](https://lucide.dev/)                                                                              |
+| Mock API        | [json-server](https://github.com/typicode/json-server) `0.17.4`                                                      |
+| Unit tests      | [Vitest](https://vitest.dev/)                                                                                        |
+| E2E tests       | [Playwright](https://playwright.dev/)                                                                                |
+| Quality         | [ESLint](https://eslint.org/) + [Prettier](https://prettier.io/)                                                     |
+| Package manager | [pnpm](https://pnpm.io/)                                                                                             |
+| Version control | Git                                                                                                                  |
 
 Full library decisions (forms, skeleton loading, CI, and more): [`base-project.md`](./base-project.md).
 
@@ -118,7 +117,7 @@ Colocated next to source as `*.test.ts` / `*.spec.ts` under `src/`.
 pnpm run test:e2e
 ```
 
-Playwright builds the app, starts preview on port `4173`, and runs specs matching `**/*.e2e.{ts,js}` (see `playwright.config.ts`).
+Playwright starts json-server on port `3001`, builds the app, starts preview on port `4173`, and runs specs matching `**/*.e2e.{ts,js}` (see `playwright.config.ts` and `e2e/schools.e2e.ts`). Existing local servers are reused when not in CI.
 
 **All tests**
 
@@ -129,32 +128,44 @@ pnpm run test
 ## Project structure
 
 ```
-CLAUDE.md                              agent entry — points to docs/
-db.json                                mock API data (/schools, /classes)
+CLAUDE.md
+db.json
 docs/
-  README.md                            this file
-  code-rules.md                        TypeScript / Svelte / styling / responsive / a11y
-  base-project.md                      stack and library decisions
-  design-system.md                     visual design system
+  README.md
+  code-rules.md
+  base-project.md
+  design-system.md
+e2e/
+  schools.e2e.ts
 src/
-  app.css                              Tailwind v4 + design tokens
-  app.d.ts
-  app.html
+  app.css
   lib/
-    components/organisms/AppHeader.svelte
-    constants/                         routes, brand copy
-    utils/                             cn(), path helpers (+ tests)
+    components/
+      atoms/                 shadcn primitives (Button, Dialog, Card, …)
+      molecules/             FormField, ConfirmDialog, SchoolCard, …
+      organisms/             SchoolsTable, SchoolForm, AppHeader, …
+    features/
+      schools/               form schema, filters, delete cascade, …
+      classes/               labels, class counts, …
+    services/api/            apiClient, schoolsService, classesService
+    utils/                   cn, formatPhone, toast, …
+    types/                   School, SchoolClass, …
   routes/
-    +layout.svelte                     skip link + AppHeader + main
-    +page.ts                           redirect / → /schools
-    schools/+page.svelte               schools landing (placeholder)
-static/
+    +layout.svelte           skip link + AppHeader + Toaster
+    +page.ts                 redirect / → /schools
+    schools/
+      +page.svelte           schools list + CRUD dialogs
+      +page.ts               load schools (soft-fail if API down)
+      +error.svelte
+      [id]/
+        +page.svelte         school detail + classes table
+        +page.ts
 playwright.config.ts
-vite.config.ts                         Vite + Vitest + SvelteKit (runes) + Tailwind
+vite.config.ts
 package.json
 ```
 
-Target feature layout (atomic design, `services/`, `e2e/`) is described in [`../CLAUDE.md`](../CLAUDE.md).
+Atomic design and folder conventions: [`../CLAUDE.md`](../CLAUDE.md).
 
 ## Documentation
 
